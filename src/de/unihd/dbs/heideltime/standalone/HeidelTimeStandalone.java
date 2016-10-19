@@ -547,7 +547,7 @@ public class HeidelTimeStandalone {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String docPath = null;
+		String inputText = null;
 		for(int i = 0; i < args.length; i++) { // iterate over cli parameter tokens
 			if(args[i].startsWith("-")) { // assume we found a switch
 				// get the relevant enum
@@ -568,7 +568,7 @@ public class HeidelTimeStandalone {
 					sw.setValue(null);
 				}
 			} else { // assume we found the document's path/name
-				docPath = args[i];
+				inputText = args[i];
 			}
 		}
 		
@@ -749,8 +749,8 @@ public class HeidelTimeStandalone {
 		}
 		
 		// make sure we have a document path
-		if (docPath == null) {
-			logger.log(Level.WARNING, "No input file given; aborting.");
+		if (inputText == null) {
+			logger.log(Level.WARNING, "No input text given; aborting.");
 			printHelp();
 			System.exit(-1);
 		}
@@ -764,22 +764,9 @@ public class HeidelTimeStandalone {
 		PrintWriter pwOut = null;
 		try {
 			logger.log(Level.INFO, "Reading document using charset: " + encodingType);
-			
-			aFile = new RandomAccessFile(docPath, "r");
-			inChannel = aFile.getChannel();
-			buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, 0, inChannel.size());
-			buffer.load();
-			byte[] inArr = new byte[(int) inChannel.size()];
-			
-			for(int i = 0; i < buffer.limit(); i++) {
-				inArr[i] = buffer.get();
-			}
-			
-			// double-newstring should not be necessary, but without this, it's not running on Windows (?)
-			String input = new String(new String(inArr, encodingType).getBytes("UTF-8"), "UTF-8");
-			
+
 			HeidelTimeStandalone standalone = new HeidelTimeStandalone(language, type, outputType, null, posTagger, doIntervalTagging);
-			String out = standalone.process(input, dct);
+			String out = standalone.process(inputText, dct);
 			
 			// Print output always as UTF-8
 			pwOut = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));

@@ -182,7 +182,7 @@ public class TimeMLResultFormatter implements ResultFormatter {
 		
 		
 		// Add TimeML start and end tags		
-		outText = "<?xml version=\"1.0\"?>\n<!DOCTYPE TimeML SYSTEM \"TimeML.dtd\">\n<TimeML>\n" + outText + "\n</TimeML>\n";
+//		outText = "<?xml version=\"1.0\"?>\n<!DOCTYPE TimeML SYSTEM \"TimeML.dtd\">\n<TimeML>\n" + outText + "\n</TimeML>\n";
 		
 		return outText;
 	}

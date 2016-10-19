@@ -47,6 +47,15 @@
 		<developerConnection>scm:git:git@github.com:HeidelTime/heideltime.git</developerConnection>
 	</scm>
 
+	<!-- local repository -->
+	<repositories>
+		<repository>
+			<id>uima</id>
+			<name>Uima</name>
+			<url>file://${project.basedir}/lib/uima-core.jar</url>
+		</repository>
+	</repositories>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<outputDirectory>${basedir}/class</outputDirectory>

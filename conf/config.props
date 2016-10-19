@@ -15,13 +15,13 @@ considerSet = true
 considerTime = true
 
 # Temponyms (make sure you know what you do if you set this to "true")
-considerTemponym = false
+considerTemponym = true
 
 ###################################
 # Path to TreeTagger home directory
 ###################################
 # Ensure there is no white space in path (try to escape white spaces)
-treeTaggerHome = SET ME IN CONFIG.PROPS! (e.g., /home/jannik/treetagger)
+treeTaggerHome = /Users/konolabs/Projects/TreeTagger
 # This one is only necessary if you want to process chinese documents.
 chineseTokenizerPath = SET ME IN CONFIG.PROPS! (e.g., /home/jannik/treetagger/chinese-tokenizer)
 
