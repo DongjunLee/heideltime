@@ -10,6 +10,9 @@
 "Mornings","MO"
 "morning","MO"
 "Morning","MO"
+// lunch
+"lunch","LU"
+"Lunch","LU"
 // mid-day
 "noon","12:00"
 "Noon","12:00"
@@ -21,6 +24,9 @@
 "Afternoons","AF"
 "mid-afternoon","AF"
 "Mid-afternoon","AF"
+// dinner
+"dinner","DI"
+"Dinner","DI"
 "evening","EV"
 "Evening","EV"
 "evenings","EV"
