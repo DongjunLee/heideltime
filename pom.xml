@@ -47,15 +47,6 @@
 		<developerConnection>scm:git:git@github.com:HeidelTime/heideltime.git</developerConnection>
 	</scm>
 
-	<!-- local repository -->
-	<repositories>
-		<repository>
-			<id>uima</id>
-			<name>Uima</name>
-			<url>file://${project.basedir}/lib/uima-core.jar</url>
-		</repository>
-	</repositories>
-
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<outputDirectory>${basedir}/class</outputDirectory>
@@ -70,6 +61,12 @@
 				<directory>resources/</directory>
 				<includes>
 					<include>**/*.txt</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>${basedir}</directory>
+				<includes>
+					<include>lib/*.jar</include>
 				</includes>
 			</resource>
 		</resources>
@@ -188,12 +185,17 @@
 	</distributionManagement>
 
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.apache.uima/uimafit-core -->
+		<dependency>
+			<groupId>org.apache.uima</groupId>
+			<artifactId>uimafit-core</artifactId>
+			<version>2.2.0</version>
+		</dependency>
 		<!-- for practically every component -->
 		<dependency>
 			<groupId>org.apache.uima</groupId>
 			<artifactId>uimaj-core</artifactId>
 			<version>2.8.1</version>
-			<scope>provided</scope>
 		</dependency>
 		<!-- for the StanfordPOSTaggerWrapper -->
 		<dependency>
