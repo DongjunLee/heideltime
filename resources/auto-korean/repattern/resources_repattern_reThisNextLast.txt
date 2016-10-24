@@ -6,15 +6,20 @@
 // english: "this","this"
 이
 이것
+이번주
 // english: "next","next"
 다음의
+다음주
 // english: "last","last"
 마지막
+저번주
 // english: "past","last"
 지나간
 이전의
+저번주
 // english: "previous","last"
 이전의
+저번주
 // english: "current","this" - no translation found
 // english: "following","next" - no translation found
 // english: "latest","last" - no translation found
