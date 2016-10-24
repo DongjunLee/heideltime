@@ -5,9 +5,12 @@
 // FORMAT: one line is one disjunction of the pattern
 [Mm]id-afternoon
 [Aa]fternoon
+[Ll]unch
 [Nn]oon
 [Mm]idnight
 [Mm]id-day
+[Dd]iner
+[Dd]inner
 [Nn]ight
 [Tt]onight
 [Mm]orning
