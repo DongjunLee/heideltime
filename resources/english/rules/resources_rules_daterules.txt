@@ -106,6 +106,7 @@ RULENAME="date_historic_0d_negative",EXTRACTION="(\b[Ii]n) (%reYearBC )(kilomete
 // EXAMPLE r0e_1: 7-14 (AP) (find 7-14)
 // EXAMPLE r0g_1: 1.3.99
 // EXAMPLE r0h_1: 1.3.1999
+// EXAMPLE r0i_1: 8/15
 RULENAME="date_r0a",EXTRACTION="(%reYear4Digit-%reMonthNumber-%reDayNumber)",NORM_VALUE="group(1)"
 RULENAME="date_r0b",EXTRACTION="(%reMonthNumber-%reDayNumber-%reYear2Digit)",NORM_VALUE="UNDEF-centurygroup(4)-group(2)-group(3)"
 RULENAME="date_r0c",EXTRACTION="%reMonthNumber/%reDayNumber/%reYear4Digit",NORM_VALUE="group(3)-%normMonth(group(1))-%normDay(group(2))"
@@ -114,6 +115,7 @@ RULENAME="date_r0e",EXTRACTION="%reMonthNumber-%reDayNumber( \(.*?\))",NORM_VALU
 RULENAME="date_r0f",EXTRACTION="%reYear4Digit%reMonthNumber%reDayNumber",NORM_VALUE="group(1)-group(2)-group(3)"
 RULENAME="date_r0g",EXTRACTION="%reDayNumber[\.]%reMonthNumber[\.]%reYear2Digit",NORM_VALUE="UNDEF-centurygroup(3)-%normMonth(group(2))-%normDay(group(1))"
 RULENAME="date_r0h",EXTRACTION="%reDayNumber[\.]%reMonthNumber[\.]%reYear4Digit",NORM_VALUE="group(3)-%normMonth(group(2))-%normDay(group(1))"
+RULENAME="date_r0i",EXTRACTION="%reMonthNumber/%reDayNumber",NORM_VALUE="UNDEF-year-%normMonth(group(1))-%normDay(group(2))"
 
 
 // date_r1
@@ -150,7 +152,9 @@ RULENAME="date_r2c2",EXTRACTION="([Tt]he )?(%reDayWordTh|%reDayNumberTh|%reDayNu
 
 // EXAMPLE r2f_1: January 1st week
 // EXAMPLE r2f_2: January first week
+// EXAMPLE r2g_1: week of october 3rd
 RULENAME="date_r2f",EXTRACTION="(%reMonthLong|%reMonthShort) (%reDayWordTh|%reDayNumberTh|%reDayNumber) [Ww]eek",NORM_VALUE="UNDEF-year-%normMonth(group(1))-week-%normDay(group(4))"
+RULENAME="date_r2g",EXTRACTION="[Ww]eek of (%reMonthLong|%reMonthShort) (%reDayWordTh|%reDayNumberTh|%reDayNumber)",NORM_VALUE="UNDEF-year-%normMonth(group(1))-week-%normDay(group(4))"
 
 // date_r3
 // EXAMPLE r3a_1: Friday October 13
