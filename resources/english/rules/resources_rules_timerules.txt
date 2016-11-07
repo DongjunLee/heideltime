@@ -62,7 +62,7 @@ RULENAME="time_r3e",EXTRACTION="%reThisNextLast %reWeekday %rePartOfDay",NORM_VA
 // EXAMPLE r4b2-1: lunch
 RULENAME="time_r4a",EXTRACTION="(([Ee]arlier|[Ll]ater|[Ee]arly) )?%reThisNextLast %rePartOfDay",NORM_VALUE="UNDEF-%normThisNextLast(group(3))-dayT%normPartOfDay(group(4))"
 RULENAME="time_r4b",EXTRACTION="([Tt]onight)",NORM_VALUE="UNDEF-this-dayT%normPartOfDay(group(1))"
-RULENAME="time_r4b2",EXTRACTION="%rePartOfDay",NORM_VALUE="UNDEF-REF-day-PLUS-0T%normPartOfDay(group(1))"
+RULENAME="time_r4b2",EXTRACTION="%rePartOfDay",NORM_VALUE="XXXX-XX-XXT%normPartOfDay(group(1))"
 
 ///////////////////////////
 // TIMEPOINT GRANULARITY //
