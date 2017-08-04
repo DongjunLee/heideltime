@@ -18,6 +18,7 @@ public enum Language {
 	 *  treeTaggerSwitch [if tree-tagger tokenization script needs a special switch for this language]) 
 	 */
 	ENGLISH		("english", "english", "english", "-e"),
+	KOREAN		("korean", "korean", "korean", "-k"),
 	GERMAN		("german", "german", "german", ""),
 	DUTCH		("dutch", "dutch", "dutch", ""),
 	ENGLISHCOLL	("englishcoll", "englishcoll", "english", "-e"),

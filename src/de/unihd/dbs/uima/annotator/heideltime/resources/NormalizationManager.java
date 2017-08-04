@@ -1,5 +1,8 @@
 package de.unihd.dbs.uima.annotator.heideltime.resources;
 
+import de.unihd.dbs.uima.annotator.heideltime.utilities.Logger;
+import de.unihd.dbs.uima.annotator.heideltime.utilities.Toolbox;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,8 +10,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
-
-import de.unihd.dbs.uima.annotator.heideltime.utilities.*;
 /**
  * 
  * This class fills the role of a manager of all the Normalization resources.
@@ -111,6 +112,10 @@ public class NormalizationManager extends GenericResourceManager {
 							correctLine = true;
 							String resource_word   = replaceSpaces(r.group(1));
 							String normalized_word = r.group(2);
+
+//							if (normalized_word.equals("nnext"))
+//								System.out.println(resource_word + " , " + normalized_word);
+
 							for (String which : hmAllNormalization.keySet()) {
 								if (resource.equals(which)) {
 									hmAllNormalization.get(which).put(resource_word,normalized_word);

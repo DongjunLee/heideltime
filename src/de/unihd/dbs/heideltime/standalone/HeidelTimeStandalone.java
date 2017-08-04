@@ -546,14 +546,13 @@ public class HeidelTimeStandalone {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public String run(String[] args) {
 		String inputText = null;
 		for(int i = 0; i < args.length; i++) { // iterate over cli parameter tokens
 			if(args[i].startsWith("-")) { // assume we found a switch
 				// get the relevant enum
 				CLISwitch sw = CLISwitch.getEnumFromSwitch(args[i]);
 				if(sw == null) { // unsupported CLI switch
-					logger.log(Level.WARNING, "Unsupported switch: "+args[i]+". Quitting.");
 					System.exit(-1);
 				}
 				
@@ -561,7 +560,6 @@ public class HeidelTimeStandalone {
 					if(args.length > i+1 && !args[i+1].startsWith("-")) { // we still have an array index after this one and it's not a switch
 						sw.setValue(args[++i]);
 					} else { // value is missing or malformed
-						logger.log(Level.WARNING, "Invalid or missing parameter after "+args[i]+". Quitting.");
 						System.exit(-1);
 					}
 				} else { // activate the value-less switches
@@ -575,7 +573,6 @@ public class HeidelTimeStandalone {
 		
 		// display help dialog if HELP-switch is given
 		if(CLISwitch.HELP.getIsActive()) {
-			printHelp();
 			System.exit(0);
 		}
 		
@@ -583,8 +580,225 @@ public class HeidelTimeStandalone {
 		// stuff can be skipped if this is set too high
 		if(CLISwitch.VERBOSITY2.getIsActive()) {
 			logger.setLevel(Level.ALL);
-			logger.log(Level.INFO, "Verbosity: '-vv'; Logging level set to ALL.");
+
+			// output the found language resource folders
+			String languagesList = "";
+			for(String language : ResourceScanner.getInstance().getDetectedResourceFolders()) {
+				languagesList += System.getProperty("line.separator") + "- " + language;
+			}
+		}
+		
+		// Check input encoding
+		String encodingType = null;
+		if(CLISwitch.ENCODING.getIsActive()) {
+			encodingType = CLISwitch.ENCODING.getValue().toString();
+		} else {
+			// Encoding type not found
+			encodingType = CLISwitch.ENCODING.getValue().toString();
+		}
+		
+		// Check output format
+		OutputType outputType = null;
+		if(CLISwitch.OUTPUTTYPE.getIsActive()) {
+			outputType = OutputType.valueOf(CLISwitch.OUTPUTTYPE.getValue().toString().toUpperCase());
+		} else {
+			// Output type not found
+			outputType = (OutputType) CLISwitch.OUTPUTTYPE.getValue();
+		}
+		
+		// Check language
+		Language language = null;
+		if(CLISwitch.LANGUAGE.getIsActive()) {
+			language = Language.getLanguageFromString((String) CLISwitch.LANGUAGE.getValue());
 			
+			if(language == Language.WILDCARD && !ResourceScanner.getInstance().getDetectedResourceFolders().contains(language.getName())) {
+				System.exit(-1);
+			}
+		} else {
+			// Language not found
+			language = Language.getLanguageFromString((String) CLISwitch.LANGUAGE.getValue());
+		}
+
+		// Check type
+		DocumentType type = null;
+		if(CLISwitch.DOCTYPE.getIsActive()) {
+			try {
+				if(CLISwitch.DOCTYPE.getValue().equals("narrative")) { // redirect "narrative" to "narratives"
+					CLISwitch.DOCTYPE.setValue("narratives");
+				}
+				type = DocumentType.valueOf(CLISwitch.DOCTYPE.getValue().toString().toUpperCase());
+			} catch(IllegalArgumentException e) {
+				System.exit(-1);
+			}
+		} else {
+			// Type not found
+			type = (DocumentType) CLISwitch.DOCTYPE.getValue();
+		}
+
+		// Check document creation time
+		Date dct = null;
+		if(CLISwitch.DCT.getIsActive()) {
+			try {
+				DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+				dct = formatter.parse(CLISwitch.DCT.getValue().toString());
+			} catch (Exception e) {
+				// DCT was not parseable
+				System.exit(-1);
+			}
+		} else {
+			if ((type == DocumentType.NEWS) || (type == DocumentType.COLLOQUIAL)) {
+				// Dct needed
+				dct = (Date) CLISwitch.DCT.getValue();
+			}
+		}
+		
+		// Handle locale switch
+		String locale = (String) CLISwitch.LOCALE.getValue();
+		Locale myLocale = null;
+		if(CLISwitch.LOCALE.getIsActive()) {
+			// check if the requested locale is available
+			for(Locale l : Locale.getAvailableLocales()) {
+				if(l.toString().toLowerCase().equals(locale.toLowerCase()))
+					myLocale = l;
+			}
+			
+			try {
+				Locale.setDefault(myLocale); // try to set the locale
+			} catch(Exception e) { // if the above fails, spit out error message and available locales
+				System.exit(-1);
+			}
+		} else {
+			// no -locale parameter supplied: just show default locale
+			;
+		}
+		
+		// Read configuration from file
+		String configPath = CLISwitch.CONFIGFILE.getValue().toString();
+		try {
+			readConfigFile(configPath);
+		} catch (Exception e) {
+			System.exit(-1);
+		}
+
+		// Set the preprocessing POS tagger
+		POSTagger posTagger = null;
+		if(CLISwitch.POSTAGGER.getIsActive()) {
+			try {
+				posTagger = POSTagger.valueOf(CLISwitch.POSTAGGER.getValue().toString().toUpperCase());
+			} catch(IllegalArgumentException e) {
+				System.exit(-1);
+			}
+		} else {
+			// Type not found
+			posTagger = (POSTagger) CLISwitch.POSTAGGER.getValue();
+		}
+
+		// Set whether or not to use the Interval Tagger
+		Boolean doIntervalTagging = false;
+		if(CLISwitch.INTERVALS.getIsActive()) {
+			doIntervalTagging = CLISwitch.INTERVALS.getIsActive();
+		}
+		
+		// make sure we have a document path
+		if (inputText == null) {
+			System.exit(-1);
+		}
+		
+		
+
+		// Run HeidelTime
+		RandomAccessFile aFile = null;
+		MappedByteBuffer buffer = null;
+		FileChannel inChannel = null;
+		PrintWriter pwOut = null;
+		try {
+			HeidelTimeStandalone standalone = new HeidelTimeStandalone(language, type, outputType, null, posTagger, doIntervalTagging);
+			return standalone.process(inputText, dct);
+		} catch (Exception e) {
+			return "ERROR";
+		} finally {
+			if(pwOut != null) {
+				pwOut.close();
+			}
+			if(buffer != null) {
+				buffer.clear();
+			}
+			if(inChannel != null) {
+				try {
+					inChannel.close();
+				} catch (IOException e) { }
+			}
+			if(aFile != null) {
+				try {
+					aFile.close();
+				} catch (IOException e) { }
+			}
+		}
+	}
+	
+	public static void readConfigFile2(String configPath) {
+		InputStream configStream = null;
+		try {
+			logger.log(Level.INFO, "trying to read in file "+configPath);
+			configStream = new FileInputStream(configPath);
+			
+			Properties props = new Properties();
+			props.load(configStream);
+
+			Config.setProps(props);
+			
+			configStream.close();
+		} catch (FileNotFoundException e) {
+			logger.log(Level.WARNING, "couldn't open configuration file \""+configPath+"\". quitting.");
+			System.exit(-1);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "couldn't close config file handle");
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		String inputText = null;
+		for(int i = 0; i < args.length; i++) { // iterate over cli parameter tokens
+			if(args[i].startsWith("-")) { // assume we found a switch
+				// get the relevant enum
+				CLISwitch sw = CLISwitch.getEnumFromSwitch(args[i]);
+				if(sw == null) { // unsupported CLI switch
+					logger.log(Level.WARNING, "Unsupported switch: "+args[i]+". Quitting.");
+					System.exit(-1);
+				}
+
+				if(sw.getHasFollowingValue()) { // handle values for switches
+					if(args.length > i+1 && !args[i+1].startsWith("-")) { // we still have an array index after this one and it's not a switch
+						sw.setValue(args[++i]);
+					} else { // value is missing or malformed
+						logger.log(Level.WARNING, "Invalid or missing parameter after "+args[i]+". Quitting.");
+						System.exit(-1);
+					}
+				} else { // activate the value-less switches
+					sw.setValue(null);
+				}
+			} else { // assume we found the document's path/name
+				inputText = "다음주에";
+			}
+		}
+
+
+		// display help dialog if HELP-switch is given
+		if(CLISwitch.HELP.getIsActive()) {
+			printHelp();
+			System.exit(0);
+		}
+
+		// start off with the verbosity recognition -- lots of the other
+		// stuff can be skipped if this is set too high
+		if(CLISwitch.VERBOSITY2.getIsActive()) {
+			logger.setLevel(Level.ALL);
+			logger.log(Level.INFO, "Verbosity: '-vv'; Logging level set to ALL.");
+
 			// output the found language resource folders
 			String languagesList = "";
 			for(String language : ResourceScanner.getInstance().getDetectedResourceFolders()) {
@@ -598,7 +812,7 @@ public class HeidelTimeStandalone {
 			logger.setLevel(Level.WARNING);
 			logger.log(Level.INFO, "Verbosity -v/-vv NOT FOUND OR RECOGNIZED; Logging level set to WARNING and above.");
 		}
-		
+
 		// Check input encoding
 		String encodingType = null;
 		if(CLISwitch.ENCODING.getIsActive()) {
@@ -609,7 +823,7 @@ public class HeidelTimeStandalone {
 			encodingType = CLISwitch.ENCODING.getValue().toString();
 			logger.log(Level.INFO, "Encoding '-e': NOT FOUND OR RECOGNIZED; set to 'UTF-8'");
 		}
-		
+
 		// Check output format
 		OutputType outputType = null;
 		if(CLISwitch.OUTPUTTYPE.getIsActive()) {
@@ -620,18 +834,18 @@ public class HeidelTimeStandalone {
 			outputType = (OutputType) CLISwitch.OUTPUTTYPE.getValue();
 			logger.log(Level.INFO, "Output '-o': NOT FOUND OR RECOGNIZED; set to "+outputType.toString().toUpperCase());
 		}
-		
+
 		// Check language
 		Language language = null;
 		if(CLISwitch.LANGUAGE.getIsActive()) {
 			language = Language.getLanguageFromString((String) CLISwitch.LANGUAGE.getValue());
-			
+
 			if(language == Language.WILDCARD && !ResourceScanner.getInstance().getDetectedResourceFolders().contains(language.getName())) {
 				logger.log(Level.SEVERE, "Language '-l': "+CLISwitch.LANGUAGE.getValue()+" NOT RECOGNIZED; aborting.");
 				printHelp();
 				System.exit(-1);
 			} else {
-				logger.log(Level.INFO, "Language '-l': "+language.getName());	
+				logger.log(Level.INFO, "Language '-l': "+language.getName());
 			}
 		} else {
 			// Language not found
@@ -676,12 +890,12 @@ public class HeidelTimeStandalone {
 				// Dct needed
 				dct = (Date) CLISwitch.DCT.getValue();
 				logger.log(Level.INFO, "Document Creation Time '-dct': NOT FOUND; set to local date ("
-						+ dct.toString() + ").");
+								+ dct.toString() + ").");
 			} else {
 				logger.log(Level.INFO, "Document Creation Time '-dct': NOT FOUND; skipping.");
 			}
 		}
-		
+
 		// Handle locale switch
 		String locale = (String) CLISwitch.LOCALE.getValue();
 		Locale myLocale = null;
@@ -691,7 +905,7 @@ public class HeidelTimeStandalone {
 				if(l.toString().toLowerCase().equals(locale.toLowerCase()))
 					myLocale = l;
 			}
-			
+
 			try {
 				Locale.setDefault(myLocale); // try to set the locale
 				logger.log(Level.INFO, "Locale '-locale': "+myLocale.toString());
@@ -705,7 +919,7 @@ public class HeidelTimeStandalone {
 			// no -locale parameter supplied: just show default locale
 			logger.log(Level.INFO, "Locale '-locale': NOT FOUND, set to environment locale: "+Locale.getDefault().toString());
 		}
-		
+
 		// Read configuration from file
 		String configPath = CLISwitch.CONFIGFILE.getValue().toString();
 		try {
@@ -717,7 +931,7 @@ public class HeidelTimeStandalone {
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.log(Level.WARNING, "Config could not be initialized! Please supply the -c switch or "
-					+ "put a config.props into this directory.");
+							+ "put a config.props into this directory.");
 			printHelp();
 			System.exit(-1);
 		}
@@ -747,15 +961,15 @@ public class HeidelTimeStandalone {
 		} else {
 			logger.log(Level.INFO, "Interval Tagger '-it': NOT FOUND OR RECOGNIZED; set to " + doIntervalTagging.toString());
 		}
-		
+
 		// make sure we have a document path
 		if (inputText == null) {
 			logger.log(Level.WARNING, "No input text given; aborting.");
 			printHelp();
 			System.exit(-1);
 		}
-		
-		
+
+
 
 		// Run HeidelTime
 		RandomAccessFile aFile = null;
@@ -767,7 +981,7 @@ public class HeidelTimeStandalone {
 
 			HeidelTimeStandalone standalone = new HeidelTimeStandalone(language, type, outputType, null, posTagger, doIntervalTagging);
 			String out = standalone.process(inputText, dct);
-			
+
 			// Print output always as UTF-8
 			pwOut = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
 			pwOut.println(out);
@@ -792,18 +1006,18 @@ public class HeidelTimeStandalone {
 			}
 		}
 	}
-	
+
 	public static void readConfigFile(String configPath) {
 		InputStream configStream = null;
 		try {
 			logger.log(Level.INFO, "trying to read in file "+configPath);
 			configStream = new FileInputStream(configPath);
-			
+
 			Properties props = new Properties();
 			props.load(configStream);
 
 			Config.setProps(props);
-			
+
 			configStream.close();
 		} catch (FileNotFoundException e) {
 			logger.log(Level.WARNING, "couldn't open configuration file \""+configPath+"\". quitting.");
@@ -813,7 +1027,7 @@ public class HeidelTimeStandalone {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static void printHelp() {
 		String path = HeidelTimeStandalone.class.getProtectionDomain().getCodeSource().getLocation().getFile();
 		String filename = path.substring(path.lastIndexOf(System.getProperty("file.separator")) + 1);
@@ -822,20 +1036,20 @@ public class HeidelTimeStandalone {
 		System.out.println("Copyright © 2011-2016 Jannik Strötgen");
 		System.out.println("This software is free. See the COPYING file for copying conditions.");
 		System.out.println();
-		
+
 		System.out.println("Usage:");
-		System.out.println("  java -jar " 
-				+ filename 
-				+ " <input-document> [-param1 <value1> ...]");
+		System.out.println("  java -jar "
+						+ filename
+						+ " <input-document> [-param1 <value1> ...]");
 		System.out.println();
 		System.out.println("Parameters and expected values:");
 		for(CLISwitch c : CLISwitch.values()) {
-			System.out.println("  " 
-					+ c.getSwitchString() 
-					+ "\t"
-					+ ((c.getSwitchString().length() > 4)? "" : "\t")
-					+ c.getName()
-					);
+			System.out.println("  "
+							+ c.getSwitchString()
+							+ "\t"
+							+ ((c.getSwitchString().length() > 4)? "" : "\t")
+							+ c.getName()
+			);
 
 			if(c == CLISwitch.LANGUAGE) {
 				System.out.print("\t\t" + "Available languages: [ ");
@@ -844,14 +1058,14 @@ public class HeidelTimeStandalone {
 						System.out.print(l.getName().toLowerCase()+" ");
 				System.out.println("]");
 			}
-			
+
 			if(c == CLISwitch.POSTAGGER) {
 				System.out.print("\t\t" + "Available taggers: [ ");
 				for(POSTagger p : POSTagger.values())
 					System.out.print(p.toString().toLowerCase()+" ");
 				System.out.println("]");
 			}
-			
+
 			if(c == CLISwitch.DOCTYPE) {
 				System.out.print("\t\t" + "Available types: [ ");
 				for(DocumentType t : DocumentType.values())
@@ -859,7 +1073,7 @@ public class HeidelTimeStandalone {
 				System.out.println("]");
 			}
 		}
-		
+
 		System.out.println();
 	}
 
