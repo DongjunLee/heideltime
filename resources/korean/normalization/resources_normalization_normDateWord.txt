@@ -13,3 +13,5 @@
 "내일","UNDEF-next-day"
 // english: "day after tomorrow","UNDEF-this-day-PLUS-2"
 "모레","UNDEF-this-day-PLUS-2"
+// english: "day after after tomorrow","UNDEF-this-day-PLUS-3"
+"글피","UNDEF-this-day-PLUS-3"
