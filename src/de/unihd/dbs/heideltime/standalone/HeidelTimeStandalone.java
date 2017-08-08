@@ -782,7 +782,7 @@ public class HeidelTimeStandalone {
 					sw.setValue(null);
 				}
 			} else { // assume we found the document's path/name
-				inputText = "다음주에";
+				inputText = "점심";
 			}
 		}
 
