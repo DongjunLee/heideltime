@@ -10,6 +10,7 @@
 // english: "noon","MD"
 정오
 正午
+점심
 // english: "afternoon","AF"
 오후
 午後

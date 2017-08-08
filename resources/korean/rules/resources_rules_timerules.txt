@@ -6,14 +6,20 @@
 //(,OFFSET="")?(,POS_CONSTRAINT="")?(,NORM_MOD="")?(,NORM_QUANT="")?(,NORM_FREQ="")?
 
 // r1a: morning
-RULENAME="time_r1a",EXTRACTION="%rePartOfDay",NORM_VALUE="UNDEF-this-dayT%normPartOfDay(group(1))"
+RULENAME="time_r1a",EXTRACTION="%rePartOfDay",NORM_VALUE="XXXX-XX-XXT%normPartOfDay(group(1))"
+RULENAME="time_r1aa",EXTRACTION="%rePartOfDay[ㄱ-ㅎㅏ-ㅣ가-힣]+",NORM_VALUE="XXXX-XX-XXT%normPartOfDay(group(1))"
 
 RULENAME="time_r1b",EXTRACTION="%rePartOfDay %reWeekday",NORM_VALUE="UNDEF-day-%normWeekday(group(2))T%normPartOfDay(group(1))"
-RULENAME="time_r1c",EXTRACTION="%reWeekday %rePartOfDay",NORM_VALUE="UNDEF-day-%normWeekday(group(1))T%normPartOfDay(group(2))"
+
+RULENAME="time_r1c",EXTRACTION="%reWeekday ?%rePartOfDay",NORM_VALUE="UNDEF-day-%normWeekday(group(1))T%normPartOfDay(group(2))"
+RULENAME="time_r1cc",EXTRACTION="%reWeekday ?%rePartOfDay[ㄱ-ㅎㅏ-ㅣ가-힣]+",NORM_VALUE="UNDEF-day-%normWeekday(group(1))T%normPartOfDay(group(2))"
 
 RULENAME="time_r1d",EXTRACTION="%rePartOfDay %reDateWord",NORM_VALUE="%normDateWord(group(2))T%normPartOfDay(group(1))"
-RULENAME="time_r1e",EXTRACTION="%reDateWord %rePartOfDay",NORM_VALUE="%normDateWord(group(1))T%normPartOfDay(group(2))"
 
-RULENAME="time_r1f",EXTRACTION="%reThisNextLast %rePartOfDay",NORM_VALUE="UNDEF-%normThisNextLast(group(1))-dayT%normPartOfDay(group(2))"
+RULENAME="time_r1e",EXTRACTION="%reDateWord ?%rePartOfDay",NORM_VALUE="%normDateWord(group(1))T%normPartOfDay(group(2))"
+RULENAME="time_r1ee",EXTRACTION="%reDateWord ?%rePartOfDay[ㄱ-ㅎㅏ-ㅣ가-힣]+",NORM_VALUE="%normDateWord(group(1))T%normPartOfDay(group(2))"
+
+RULENAME="time_r1f",EXTRACTION="%reThisNextLast ?%rePartOfDay",NORM_VALUE="UNDEF-%normThisNextLast(group(1))-weekT%normPartOfDay(group(2))"
+RULENAME="time_r1f",EXTRACTION="%reThisNextLast ?%rePartOfDay[ㄱ-ㅎㅏ-ㅣ가-힣]+",NORM_VALUE="UNDEF-%normThisNextLast(group(1))-weekT%normPartOfDay(group(2))"
 
 
